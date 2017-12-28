@@ -25,3 +25,5 @@ double expo(double x);
 double fpow(double x, double y);
 double power(double x, int8_t y);
 void* parallelKernel(void *args);
+void* piLoopBody(void *args);
+double piLoop(uint32_t nTimes, uint32_t nThreads, double step);

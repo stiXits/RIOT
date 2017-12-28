@@ -16,7 +16,7 @@
 #include "threading.h"
 
 //pi calculation
-static long num_steps = 1000000; 
+static int32_t num_steps = 1000000; 
 
 static uint8_t engine;
 
@@ -112,6 +112,49 @@ uint8_t benchmark(uint8_t enginetype)
   fclose( file );
 
   return 0;
+}
+
+void* piLoopBody(void *args)
+{
+    piLoopBodyArgs *arguments = (piLoopBodyArgs *) args;
+    double x;
+
+    for(int32_t i = 0; i < arguments->nTimes; i++)
+    {
+        x = (i+0.5)*arguments->step;
+        arguments->sum += 4.0/(1.0+x*x);
+    }
+
+    return NULL;
+}
+
+double piLoop(uint32_t nTimes, uint32_t nThreads, double step)
+{
+    uint32_t nTimesPerThread = nTimes/nThreads;
+
+    piLoopBodyArgs allArguments[nThreads];
+
+    for(uint8_t i = 0; i < nThreads; i++)
+    {
+        piLoopBodyArgs singleArgs;
+        singleArgs.step = step;
+        singleArgs.nTimes = nTimesPerThread;
+
+        allArguments[i] = singleArgs;
+    }
+
+    multitThreadArgs multiArg;
+    multiArg.singleThreadArgs = allArguments;
+
+    createJoinThreads(nThreads, piLoopBody, (void *) &multiArg);
+
+    uint32_t sumOfAllThreads = 0;
+    for(uint8_t i = 0; i < nThreads; i++)
+    {
+        sumOfAllThreads += allArguments[i].sum;
+    }
+
+    return sumOfAllThreads * step;
 }
 
 void* parallelKernel(void *args)
