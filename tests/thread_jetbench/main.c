@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "jetbench.h"
 
 int main(void)
@@ -11,5 +13,5 @@ int main(void)
     // run turbofan benchmark
     benchmark(3);
 
-    return 0;
+    exit(0);
 }

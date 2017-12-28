@@ -10,14 +10,15 @@
 
 */
 
-#include "jetbench.h"
 #include<stdlib.h>
+
+#include "jetbench.h"
 #include "threading.h"
 
 //pi calculation
 static long num_steps = 1000000; 
 
-static int engine;
+static uint8_t engine;
 
 static double g0,g0d,gama,tref,abflag;
 static double tt4,tt4d,tt7,tt7d,p3p2d,p3fp2d,byprat,throtl;
@@ -51,11 +52,11 @@ static double dcomp,lcomp,dburner,lburn,dturbin,lturb,dnozl,lnoz,dfan,ncomp,ntur
 static double sblade,hblade,tblade,xcomp,ncompd;
 
 static double TotalUsed;
-static int NumPoints, NumMissed;
+static uint32_t NumPoints, NumMissed;
 static double TotalTimePoint=0, TotalTime=0;
 static FILE *file;
 
-int benchmark(int enginetype)
+uint8_t benchmark(uint8_t enginetype)
 {
 	double *StartPiTime, *EndPiTime, *PiTime;
 	StartPiTime = (double *)calloc(16,sizeof(double));
@@ -90,10 +91,7 @@ int benchmark(int enginetype)
   //open the Inputs file
   file=fopen( "myfile.txt", "r" );
 
-  parallelKernelArgs args;
-  args.file = file;
-
-  createJoinThreads(NUM_THREADS, parallelKernel, (void *) &args);
+  createJoinThreads(NUM_THREADS, parallelKernel, 0);
 
 	printf("\nTotal execution time is : %lf with %d missed deadline\n", (TotalTime)/NUM_THREADS, NumMissed);
 	printf("  Which represents %3.1lf%% of\n",TotalUsed*100/NumPoints);
@@ -113,16 +111,15 @@ int benchmark(int enginetype)
 
   fclose( file );
 
-  exit(0);
+  return 0;
 }
-  //***end of main***//
 
 void* parallelKernel(void *args)
 {
   double a,b,c,d;
   double pi;
   double step = 1.0/(double) num_steps;
-  int tid1, tid2, tid3;
+  uint32_t tid1, tid2, tid3;
   double *StartPiTime, *EndPiTime, *PiTime;
   double used, usedTime;
   double StartTime, EndTime, ExecTime, ExecTotTime;
@@ -270,11 +267,11 @@ double number,a,b,c,d ;
 }
 
 /* Utility to get the Mach number given the corrected airflow per area */
-double getMach (int sub, double corair, double gama1)
+double getMach (uint32_t sub, double corair, double gama1)
 {
 double number,chokair;                  // iterate for mach number
 double deriv,machn,macho,airo,airn;
-int iter ;
+uint32_t iter ;
       chokair = getAir(1.0, gama1) ;
       if (corair > chokair) {
         number = 1.0 ;
@@ -345,7 +342,7 @@ double fac1,fac2,fac3,fac4;
 /* Default parameters */
 void defaultParam(void)
 {
-  int i ;
+  uint32_t i ;
   //allocate memory for arrays
   trat = (double *)calloc(20,sizeof(double));
   tt = (double *)calloc(20,sizeof(double));
@@ -757,7 +754,7 @@ double log(double x)
 {
 double number = 0;
 double coeff = -1;
-int i = 1;
+uint32_t i = 1;
 	if (x<=0)
 	{
 		printf("error log undefined\n");
@@ -785,7 +782,7 @@ double expo(double x)
 {
 double number = 1;
 double coeff = 1;
-int i = 1;
+uint32_t i = 1;
 	// if x > log(DBL_MAX)
 	if (x>709.782712893384)
 	return expo(709.78); // Infinite value
@@ -803,7 +800,7 @@ return number;
 
 double fpow(double x, double y)
 {
-int partieEntiere = y;
+  int32_t partieEntiere = y;
 
 	// If x<0 and y not integer
 	if (x<0 && (double)partieEntiere!=y)
@@ -823,10 +820,10 @@ int partieEntiere = y;
 return power(x, partieEntiere) * expo((y-partieEntiere)*log(x));
 }
 
-double power(double x, int y)
+double power(double x, int32_t y)
 {
 double number = 1;
-int i;
+int32_t i;
 // x^(-y) = 1/(x^y)
 	if (y<0)
 	return 1/(power(x,-y));

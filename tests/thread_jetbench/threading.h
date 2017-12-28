@@ -1,6 +1,8 @@
+#include <inttypes.h>
+
 typedef struct {
-   int nTimes;
-   int sum;
+   uint32_t nTimes;
+   uint32_t sum;
    double step;
 } piLoopBodyArgs; 
 
@@ -8,9 +10,9 @@ typedef struct {
     piLoopBodyArgs * singleThreadArgs;
 } multitThreadArgs; 
 
-void createJoinThreads(int nThreads,  void *(*start_routine)(void *), void *arg);
+void createJoinThreads(uint32_t nThreads,  void *(*start_routine)(void *), void *arg);
 void* piLoopBody(void *args);
-double piLoop(int nTimes, int nThreads, double step);
+double piLoop(uint32_t nTimes, uint32_t nThreads, double step);
 double threadTime(void);
 void* threadTimeTest(void * args);
-int threadId(void);
+uint32_t threadId(void);
