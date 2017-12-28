@@ -52,7 +52,7 @@ static double dcomp,lcomp,dburner,lburn,dturbin,lturb,dnozl,lnoz,dfan,ncomp,ntur
 static double sblade,hblade,tblade,xcomp,ncompd;
 
 static double TotalUsed;
-static uint32_t NumPoints, NumMissed;
+static uint8_t NumPoints, NumMissed;
 static double TotalTimePoint=0, TotalTime=0;
 static FILE *file;
 
@@ -119,7 +119,7 @@ void* parallelKernel(void *args)
   double a,b,c,d;
   double pi;
   double step = 1.0/(double) num_steps;
-  uint32_t tid1, tid2, tid3;
+  uint8_t tid1, tid2, tid3;
   double *StartPiTime, *EndPiTime, *PiTime;
   double used, usedTime;
   double StartTime, EndTime, ExecTime, ExecTotTime;
@@ -267,11 +267,11 @@ double number,a,b,c,d ;
 }
 
 /* Utility to get the Mach number given the corrected airflow per area */
-double getMach (uint32_t sub, double corair, double gama1)
+double getMach (uint8_t sub, double corair, double gama1)
 {
 double number,chokair;                  // iterate for mach number
 double deriv,machn,macho,airo,airn;
-uint32_t iter ;
+uint8_t iter ;
       chokair = getAir(1.0, gama1) ;
       if (corair > chokair) {
         number = 1.0 ;
@@ -342,7 +342,7 @@ double fac1,fac2,fac3,fac4;
 /* Default parameters */
 void defaultParam(void)
 {
-  uint32_t i ;
+  uint8_t i ;
   //allocate memory for arrays
   trat = (double *)calloc(20,sizeof(double));
   tt = (double *)calloc(20,sizeof(double));
@@ -754,7 +754,7 @@ double log(double x)
 {
 double number = 0;
 double coeff = -1;
-uint32_t i = 1;
+uint8_t i = 1;
 	if (x<=0)
 	{
 		printf("error log undefined\n");
@@ -782,7 +782,7 @@ double expo(double x)
 {
 double number = 1;
 double coeff = 1;
-uint32_t i = 1;
+uint8_t i = 1;
 	// if x > log(DBL_MAX)
 	if (x>709.782712893384)
 	return expo(709.78); // Infinite value
@@ -800,7 +800,7 @@ return number;
 
 double fpow(double x, double y)
 {
-  int32_t partieEntiere = y;
+  int8_t partieEntiere = y;
 
 	// If x<0 and y not integer
 	if (x<0 && (double)partieEntiere!=y)
@@ -820,10 +820,10 @@ double fpow(double x, double y)
 return power(x, partieEntiere) * expo((y-partieEntiere)*log(x));
 }
 
-double power(double x, int32_t y)
+double power(double x, int8_t y)
 {
 double number = 1;
-int32_t i;
+int8_t i;
 // x^(-y) = 1/(x^y)
 	if (y<0)
 	return 1/(power(x,-y));
