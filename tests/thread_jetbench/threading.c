@@ -10,7 +10,7 @@
 
 void createJoinThreads(uint8_t nThreads,  void *(*start_routine)(void *), void *arg)
 {
-    multitThreadArgs *multipleArgs = (multitThreadArgs *) arg;
+    multitThreadArgs_t *multipleArgs = (multitThreadArgs_t *) arg;
 
     // char rcv_thread_stack[nThreads][THREAD_STACKSIZE_MAIN];
     pthread_t tId[nThreads];

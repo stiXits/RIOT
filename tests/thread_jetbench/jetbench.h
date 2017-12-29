@@ -27,3 +27,11 @@ double power(double x, int8_t y);
 void* parallelKernel(void *args);
 void* piLoopBody(void *args);
 double piLoop(uint32_t nTimes, uint32_t nThreads, double step);
+double readPoint(double pi);
+void initStaticVariables(void);
+void calculatePoint(double timePoint, 
+					uint8_t *tid3, 
+					double *used, 
+					double *PiTime, 
+					double *ExecTotTime,
+					double *usedTime);
