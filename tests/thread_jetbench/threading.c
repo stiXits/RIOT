@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include <string.h>
-#include <omp.h>
 
 #include "pthread.h"
 #include "xtimer.h"
