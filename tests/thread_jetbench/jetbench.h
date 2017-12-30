@@ -6,7 +6,7 @@
 
 #define PRECISION 0.0001
 
-uint8_t benchmark(uint8_t enginetype);
+uint8_t benchmark(uint8_t enginetype, uint8_t verboseMode);
 double getGama(double temp);
 double getCp(double temp);
 double getMach(uint8_t sub, double corair, double gama1);

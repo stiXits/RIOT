@@ -59,7 +59,8 @@ static double sblade,hblade,tblade,xcomp,ncompd;
 static double TotalUsed;
 static uint8_t NumPoints, NumMissed;
 static double TotalTimePoint=0, TotalTime=0;
-static FILE *file;
+static FILE *inputFile, *outputFile, *engineResults;
+static uint8_t verbose;
 
 void initStaticVariables(void)
 {
@@ -70,7 +71,7 @@ void initStaticVariables(void)
     TotalUsed = 0;
 }
 
-uint8_t benchmark(uint8_t enginetype)
+uint8_t benchmark(uint8_t enginetype, uint8_t verboseMode)
 {
     initStaticVariables();
     double *StartPiTime, *EndPiTime, *PiTime;
@@ -81,23 +82,29 @@ uint8_t benchmark(uint8_t enginetype)
     //define paramaters
     defaultParam();
     engine = enginetype;
-
-    //header for results
-    printf("T,ExecTime,  Spd| Alt |  Thr| Mach|Press| Temp|");
-    printf(" Fnet|Fgros|RamDr|FlFlo|TSFC|Airfl|Weight|Fn/W\n");
+    verbose = verboseMode;
 
     //open the Inputs file
-    file=fopen( "myfile.txt", "r" );
+    inputFile = fopen("enginePoints", "r");
+    outputFile = fopen("output", "w");
+
+    if(verbose) {
+        engineResults = fopen("engineResults", "w");
+        //header for results
+        fprintf(engineResults, "T,ExecTime,  Spd| Alt |  Thr| Mach|Press| Temp|");
+        fprintf(engineResults, " Fnet|Fgros|RamDr|FlFlo|TSFC|Airfl|Weight|Fn/W\n");
+        fflush(engineResults);
+    }
 
     createJoinThreads(NUM_THREADS, parallelKernel, 0);
 
-    printf("\nTotal execution time is : %lf with %d missed deadline\n", 
+    fprintf(outputFile, "\nTotal execution time is : %lf with %d missed deadline\n", 
         (TotalTime)/NUM_THREADS, 
         NumMissed);
-    printf("    Which represents %3.1lf%% of\n",TotalUsed*100/NumPoints);
-    printf("    Real time used : %lf\n", TotalTimePoint/NUM_THREADS);
-    printf("Number of threads : %d\n", NUM_THREADS);
-    printf("Number of points : %d\n",NumPoints);
+    fprintf(outputFile, "    Which represents %3.1lf%% of\n",TotalUsed*100/NumPoints);
+    fprintf(outputFile, "    Real time used : %lf\n", TotalTimePoint/NUM_THREADS);
+    fprintf(outputFile, "Number of threads : %d\n", NUM_THREADS);
+    fprintf(outputFile, "Number of points : %d\n",NumPoints);
     free(trat);
     free(tt);
     free(prat);
@@ -109,7 +116,8 @@ uint8_t benchmark(uint8_t enginetype)
     free(EndPiTime);
     free(PiTime);
 
-    fclose( file );
+    fclose(inputFile);
+    fclose(outputFile);
 
     return 0;
 }
@@ -175,7 +183,7 @@ void* parallelKernel(void *args)
     PiTime = (double *)calloc(16,sizeof(double));
 
     // read line by line
-    while (!feof(file))
+    while (!feof(inputFile))
     {
 
         tid1 = threadId();
@@ -187,10 +195,10 @@ void* parallelKernel(void *args)
         PiTime[tid2] = EndPiTime[tid2] - StartPiTime[tid2];
 
         // Read a line, Speed Altitude and Throttle
-        fscanf(file,"%lf%lf%lf%lf",&a,&b,&c,&d);
+        fscanf(inputFile,"%lf%lf%lf%lf",&a,&b,&c,&d);
 
         // Avoid the last point to be execute twice because of the while loop
-        if(!feof(file))
+        if(!feof(inputFile))
         {
             u0d = a;
             altd=b;
@@ -224,19 +232,28 @@ void* parallelKernel(void *args)
             NumPoints++;
 
             //*********** PRINT RESULTS ************
-            if(used > 1)
-            {
-            printf("%d,%7lf, %4.0lf|%5.0lf|%5.1lf|%5.3lf|%5.2lf|%5.1lf|%5.0lf|%5.0lf|%5.0lf|%5.0lf|%4.2lf|%5.1lf|%6.2lf|%4.2lf\nDeadline missed : %3.1lf%% used for point %d\n"
-            ,tid3,ExecTotTime,u0d,altd,throtl,fsmach,psout,tsout,fnlb,fglb,drlb,flflo,sfc,eair,weight,fnlb/weight, used*100, NumPoints);
-            NumMissed ++;
-            TotalTimePoint += usedTime;
+            if(used > 1) {
+                if(verbose) {
+                    fprintf(engineResults,
+                            "%d,%7lf, %4.0lf|%5.0lf|%5.1lf|%5.3lf|%5.2lf|%5.1lf|%5.0lf|%5.0lf|%5.0lf|%5.0lf|%4.2lf|%5.1lf|%6.2lf|%4.2lf\nDeadline missed : %3.1lf%% used for point %d\n",
+                            tid3, ExecTotTime, u0d, altd, 
+                            throtl, fsmach, psout, tsout, 
+                            fnlb, fglb, drlb, flflo, sfc, 
+                            eair, weight, fnlb/weight, 
+                            used*100, NumPoints);
+                }
+                NumMissed ++;
+                TotalTimePoint += usedTime;
             }
-
-            else
-            printf("%d,%7lf, %4.0lf|%5.0lf|%5.1lf|%5.3lf|%5.2lf|%5.1lf|%5.0lf|%5.0lf|%5.0lf|%5.0lf|%4.2lf|%5.1lf|%6.2lf|%4.2lf%3.1lf%% used for point %d\n"
-            , tid3,ExecTotTime,u0d,altd,throtl,fsmach,psout,tsout,fnlb,fglb,drlb,flflo,sfc,eair,weight,fnlb/weight, used*100, NumPoints);
-
-
+            else if(verbose){
+                fprintf(engineResults,
+                        "%d,%7lf, %4.0lf|%5.0lf|%5.1lf|%5.3lf|%5.2lf|%5.1lf|%5.0lf|%5.0lf|%5.0lf|%5.0lf|%4.2lf|%5.1lf|%6.2lf|%4.2lf%3.1lf%% used for point %d\n",
+                        tid3, ExecTotTime, u0d, altd,
+                        throtl, fsmach, psout, tsout,
+                        fnlb, fglb, drlb, flflo, sfc,
+                        eair, weight, fnlb/weight,
+                        used*100, NumPoints);
+            }
         }// End of if(!feof)
   }// End of while(!feof)
 
