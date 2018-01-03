@@ -213,7 +213,8 @@ struct _thread {
 
 /**
  * @def THREAD_STACKSIZE_DEFAULT
- * @brief A reasonable default stack size that will suffice most smaller tasks
+ * @brief A reasonable default stack size that will suffice for most smaller 
+ *        tasks
  *
  * @note This value must be defined by the CPU specific implementation, please
  *       take a look at @c cpu/$CPU/include/cpu_conf.h
@@ -319,7 +320,7 @@ struct _thread {
 /**
  * @brief Creates a new thread.
  *
- * For an in-depth discussion of thread priorities, behavior and and flags,
+ * For an in-depth discussion of thread priorities, behavior and flags,
  * see @ref core_thread.
  *
  * @note Avoid assigning the same priority to two or more threads.
@@ -329,7 +330,7 @@ struct _thread {
  *
  * @param[out] stack    start address of the preallocated stack memory
  * @param[in] stacksize the size of the thread's stack in bytes
- * @param[in] priority  priority of the new thread, lower mean higher priority
+ * @param[in] priority  priority of the new thread, a lower value means higher priority
  * @param[in] flags     optional flags for the creation of the new thread
  * @param[in] task_func pointer to the code that is executed in the new thread
  * @param[in] arg       the argument to the function
@@ -386,7 +387,7 @@ void thread_sleep(void);
 void thread_yield(void);
 
 /**
- * @brief   Lets current thread yield in favor of a higher prioritized thread.
+ * @brief   Lets the current thread yield in favor of a higher prioritized thread.
  *
  * @details The current thread will resume operation immediately,
  *          if there is no other ready thread with a higher priority.
